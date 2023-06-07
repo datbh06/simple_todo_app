@@ -17,6 +17,8 @@ public class TodoApp {
     private static Map<Integer, String> completedList = new LinkedHashMap<>();
     private static final Map<String, List<Integer>> categories = new LinkedHashMap<>();
     private static final Map<Integer, String> dueDates = new LinkedHashMap<>();
+    private static final Map<Integer, String> completedDueDates = new HashMap<>();
+
     private static final Scanner sc = new Scanner(System.in);
 
     public static void main(String[] args) {
@@ -86,7 +88,9 @@ public class TodoApp {
         if (!completedList.isEmpty()) {
             System.out.println("Completed Items");
             for (Map.Entry<Integer, String> entry : completedList.entrySet()) {
-                System.out.println(entry.getKey() + " " + entry.getValue());
+                // Retrieve and display the due date
+                String dueDate = completedDueDates.get(entry.getKey());
+                System.out.println(entry.getKey() + " " + entry.getValue() + " (Completed: " + dueDate + ")");
             }
             System.out.println();
         }
@@ -105,7 +109,7 @@ public class TodoApp {
         todoList.put(key, item);
 
         // Prompt the user to enter a due date
-        System.out.println("Enter a due date (MM/DD/YYYY): ");
+        System.out.println("Enter a due date (DD/MM/YYYY): ");
         String dueDate = sc.nextLine();
         dueDates.put(key, dueDate);
 
@@ -138,6 +142,18 @@ public class TodoApp {
         return updatedMap;
     }
 
+    public static void removeItemFromCategories(int itemId) {
+        // Remove the item ID from its category
+        for (Map.Entry<String, List<Integer>> entry : categories.entrySet()) {
+            List<Integer> itemIds = entry.getValue();
+            itemIds.remove(Integer.valueOf(itemId));
+            // Remove the category if it no longer contains any items
+            if (itemIds.isEmpty()) {
+                categories.remove(entry.getKey());
+            }
+        }
+    }
+
     /**
      * Prompts the user to select a to-do item to remove
      * and removes it from the list.
@@ -152,10 +168,14 @@ public class TodoApp {
 
         if (todoList.containsKey(choice)) {
             todoList.remove(choice);
+            dueDates.remove(choice); // remove the due date
+            // Remove the item ID from its category
+            removeItemFromCategories(choice);
             // Reorder the keys in the map
             todoList = reorderedKeys(todoList);
         } else if (completedList.containsKey(choice)) {
             completedList.remove(choice);
+            dueDates.remove(choice);
             // Reorder the keys in the map
             completedList = reorderedKeys(completedList);
         } else {
@@ -177,13 +197,17 @@ public class TodoApp {
 
         if (todoList.containsKey(choice)) {
             String item = todoList.remove(choice);
+            String dueDate = dueDates.remove(choice); // remove the due date
             int key = completedList.size() + 1;
             completedList.put(key, item);
+            completedDueDates.put(key, dueDate); // add the due date to the completedDueDates map
+            // Remove the item ID from its category
+            removeItemFromCategories(choice);
+
             // Reorder the keys in the map
             todoList = reorderedKeys(todoList);
         } else {
             System.out.println("Invalid choice. Please try again.");
         }
     }
-
 }
