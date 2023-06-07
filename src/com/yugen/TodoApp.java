@@ -1,14 +1,19 @@
 package com.yugen;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Scanner;
 
+/*
+ * @author Dat Bui
+ *
+ *  */
 public class TodoApp {
+
     private static Map<Integer, String> todoList = new LinkedHashMap<>();
     private static Map<Integer, String> completedList = new LinkedHashMap<>();
-    private static int itemCount = 0;
-    private static Scanner sc = new Scanner(System.in);
+    private static final Scanner sc = new Scanner(System.in);
 
     public static void main(String[] args) {
         int menuItem = -1;
@@ -21,6 +26,7 @@ public class TodoApp {
                 case 3 -> removeTodoItem();
                 case 4 -> markAsCompleted();
                 case 0 -> System.out.println("Exiting the program. Goodbye!");
+                default -> System.out.println("Invalid!");
             }
         }
         sc.close();
@@ -87,7 +93,24 @@ public class TodoApp {
     }
 
     /**
-     * Prompts the user to select a to-do item to remove and removes it from the list.
+     * Reorders the keys in a map so that they are consecutive integers starting from 1.
+     *
+     * @param originalMap the map to reorder
+     * @return a new map with the same values as the original map but with reordered keys
+     */
+    public static Map<Integer, String> reorderedKeys(Map<Integer, String> originalMap) {
+        Map<Integer, String> updatedMap = new HashMap<>();
+        int key = 1;
+        for (Map.Entry<Integer, String> entry : originalMap.entrySet()) {
+            updatedMap.put(key, entry.getValue());
+            key++;
+        }
+        return updatedMap;
+    }
+
+    /**
+     * Prompts the user to select a to-do item to remove
+     * and removes it from the list.
      */
     public static void removeTodoItem() {
         int choice;
@@ -100,23 +123,11 @@ public class TodoApp {
         if (todoList.containsKey(choice)) {
             todoList.remove(choice);
             // Reorder the keys in the map
-            Map<Integer, String> updatedTodoList = new LinkedHashMap<>();
-            int newKey = 1;
-            for (Map.Entry<Integer, String> entry : todoList.entrySet()) {
-                updatedTodoList.put(newKey, entry.getValue());
-                newKey++;
-            }
-            todoList = updatedTodoList;
+            todoList = reorderedKeys(todoList);
         } else if (completedList.containsKey(choice)) {
             completedList.remove(choice);
             // Reorder the keys in the map
-            Map<Integer, String> updatedCompletedList = new LinkedHashMap<>();
-            int newKey = 1;
-            for (Map.Entry<Integer, String> entry : completedList.entrySet()) {
-                updatedCompletedList.put(newKey, entry.getValue());
-                newKey++;
-            }
-            completedList = updatedCompletedList;
+            completedList = reorderedKeys(completedList);
         } else {
             System.out.println("Invalid choice. Please try again.");
         }
@@ -148,5 +159,6 @@ public class TodoApp {
         } else {
             System.out.println("Invalid choice. Please try again.");
         }
+
     }
 }
