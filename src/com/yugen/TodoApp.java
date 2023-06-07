@@ -1,16 +1,22 @@
 package com.yugen;
 
 import java.util.*;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 /*
- * @author Dat Bui
- *
- *  */
+ * @author: DatBH
+ * @since: 6/7/2023 11:27 AM
+ * @description: This is a simple command-line to-do list application written in Java.
+ * It allows users to manage their to-do list by adding, removing, and marking items as completed.
+ * @update:
+ * */
 public class TodoApp {
 
     private static Map<Integer, String> todoList = new LinkedHashMap<>();
     private static Map<Integer, String> completedList = new LinkedHashMap<>();
-    private static Map<String, List<Integer>> categories = new LinkedHashMap<>();
+    private static final Map<String, List<Integer>> categories = new LinkedHashMap<>();
+    private static final Map<Integer, String> dueDates = new LinkedHashMap<>();
     private static final Scanner sc = new Scanner(System.in);
 
     public static void main(String[] args) {
@@ -58,17 +64,23 @@ public class TodoApp {
     }
 
     /**
-     * Displays the current to-do list.
+     * Displays the current to-do list grouped by categories
      */
     public static void showTodoList() {
-        System.out.println("To-Do List");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE, dd/MMMM/yyyy");
+        String formattedDate = LocalDate.now().format(formatter);
+        System.out.println("To-Do List \n" + formattedDate);
 
+        //Iterate over the categories and display their to-do items
         for (Map.Entry<String, List<Integer>> category : categories.entrySet()) {
             System.out.println(category.getKey() + ":");
             for (Integer itemId : category.getValue()) {
-                System.out.println("  " + itemId + " " + todoList.get(itemId));
+                // Retrieve and display the due date
+                String dueDate = dueDates.get(itemId);
+                System.out.println("  " + itemId + " " + todoList.get(itemId) + " (Due: " + dueDate + ")");
             }
         }
+
         System.out.println();
 
         if (!completedList.isEmpty()) {
@@ -91,6 +103,12 @@ public class TodoApp {
         } while (item.isEmpty());
         int key = todoList.size() + 1;
         todoList.put(key, item);
+
+        // Prompt the user to enter a due date
+        System.out.println("Enter a due date (MM/DD/YYYY): ");
+        String dueDate = sc.nextLine();
+        dueDates.put(key, dueDate);
+
         // Prompt the user to select a category
         System.out.println("Select a category: ");
         for (String category : categories.keySet()) {
@@ -100,10 +118,8 @@ public class TodoApp {
         String category = sc.nextLine();
 
         // Add the new to-do item to the selected category
-        if (!categories.containsKey(category)) {
-            categories.put(category, new ArrayList<>());
-        }
-        categories.get(category).add(key);
+        categories.computeIfAbsent(category, k -> new ArrayList<>()).add(key);
+
     }
 
     /**
@@ -148,7 +164,7 @@ public class TodoApp {
     }
 
     /**
-     * Prompts the user to select a to-do item to mark as completed
+     * Prompts the user to select a to-do item to mark  as completed
      * and moves it to the completed list.
      */
     public static void markAsCompleted() {
