@@ -1,9 +1,6 @@
 package com.yugen;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 
 /*
  * @author Dat Bui
@@ -13,6 +10,7 @@ public class TodoApp {
 
     private static Map<Integer, String> todoList = new LinkedHashMap<>();
     private static Map<Integer, String> completedList = new LinkedHashMap<>();
+    private static Map<String, List<Integer>> categories = new LinkedHashMap<>();
     private static final Scanner sc = new Scanner(System.in);
 
     public static void main(String[] args) {
@@ -65,8 +63,11 @@ public class TodoApp {
     public static void showTodoList() {
         System.out.println("To-Do List");
 
-        for (Map.Entry<Integer, String> entry : todoList.entrySet()) {
-            System.out.println(entry.getKey() + " " + entry.getValue());
+        for (Map.Entry<String, List<Integer>> category : categories.entrySet()) {
+            System.out.println(category.getKey() + ":");
+            for (Integer itemId : category.getValue()) {
+                System.out.println("  " + itemId + " " + todoList.get(itemId));
+            }
         }
         System.out.println();
 
@@ -90,6 +91,19 @@ public class TodoApp {
         } while (item.isEmpty());
         int key = todoList.size() + 1;
         todoList.put(key, item);
+        // Prompt the user to select a category
+        System.out.println("Select a category: ");
+        for (String category : categories.keySet()) {
+            System.out.println(category);
+        }
+        System.out.println("Or enter a new category: ");
+        String category = sc.nextLine();
+
+        // Add the new to-do item to the selected category
+        if (!categories.containsKey(category)) {
+            categories.put(category, new ArrayList<>());
+        }
+        categories.get(category).add(key);
     }
 
     /**
@@ -134,7 +148,8 @@ public class TodoApp {
     }
 
     /**
-     * Prompts the user to select a to-do item to mark as completed and moves it to the completed list.
+     * Prompts the user to select a to-do item to mark as completed
+     * and moves it to the completed list.
      */
     public static void markAsCompleted() {
         int choice;
@@ -149,16 +164,10 @@ public class TodoApp {
             int key = completedList.size() + 1;
             completedList.put(key, item);
             // Reorder the keys in the map
-            Map<Integer, String> updatedTodoList = new LinkedHashMap<>();
-            int newKey = 1;
-            for (Map.Entry<Integer, String> entry : todoList.entrySet()) {
-                updatedTodoList.put(newKey, entry.getValue());
-                newKey++;
-            }
-            todoList = updatedTodoList;
+            todoList = reorderedKeys(todoList);
         } else {
             System.out.println("Invalid choice. Please try again.");
         }
-
     }
+
 }
