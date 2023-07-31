@@ -4,13 +4,6 @@ import java.util.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
-/*
- * @author: DatBH
- * @since: 6/7/2023 11:27 AM
- * @description: This is a simple command-line to-do list application written in Java.
- * It allows users to manage their to-do list by adding, removing, and marking items as completed.
- * @update:
- * */
 public class TodoApp {
 
     private static Map<Integer, String> todoList = new LinkedHashMap<>();
